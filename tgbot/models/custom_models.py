@@ -1,5 +1,14 @@
+from sqlalchemy import Column, String, DateTime, Text, sql
+
 from tgbot.models.base_models import BaseModel
 
 
 class News(BaseModel):
-    pass
+    __tablename__ = 'news'
+    title = Column(String())
+    link = Column(String())
+    pubDate= Column(DateTime())
+    description = Column(Text())
+    image = Column(String())
+
+    query: sql.Select
