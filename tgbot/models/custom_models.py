@@ -7,7 +7,7 @@ class News(BaseModel):
     __tablename__ = 'news'
     title = Column(String())
     link = Column(String())
-    pubDate= Column(DateTime())
+    pubDate= Column(DateTime(timezone=True))
     description = Column(Text())
     image = Column(String())
 

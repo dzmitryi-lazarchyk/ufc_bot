@@ -1,3 +1,5 @@
+from datetime import datetime
+from time import strptime, mktime
 from urllib.request import urlopen
 from xml.etree.ElementTree import parse
 from xml.etree.ElementTree import Element, tostring
@@ -13,19 +15,23 @@ def get_news():
         categories = item.iterfind('category')
         for category in categories:
             if category.text == 'breaking':
+                struct_object= strptime(item.findtext('pubDate'),'%a, %d %b %Y %H:%M:%S %z')
+                pubDate = datetime.fromtimestamp(mktime(struct_object))
                 news = News(title= item.findtext('title'),
                             link=item.findtext('link'),
-                            pubDate = item.findtext('pubDate'),
+                            pubDate = pubDate,
+                            #                                         Tue, 25 Oct 2022 19:11:24 +0300
                             description = item.findtext('description'),
                             image = item.findtext('image'),
                             )
                 all_news.append(news)
                 break
-    for news in all_news:
-        print(f'{news.title}\n'
-              f'{news.description}\n'
-              f'{news.link}\n'
-              f'{news.pubDate}\n\n')
+    # for news in all_news:
+    #     print(f'{news.title}\n'
+    #           f'{news.description}\n'
+    #           f'{news.link}\n'
+    #           f'{type(news.pubDate)}\n\n')
+    return all_news
     # s = {'name': 'Den', 'shares': 70, 'price': 345.23}
     # e = dict_to_xml('test', s)
     # with open('dict_xml.xml', 'wb') as file:

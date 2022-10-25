@@ -4,7 +4,11 @@ from gino import Gino
 import sqlalchemy as sa
 from sqlalchemy import Column, DateTime
 
+from tgbot.config import load_config
+
 db = Gino()
+db_config = load_config().db
+POSTGRES_URI=f"postgresql://{db_config.user}:{db_config.password}@{db_config.host}/{db_config.database}"
 
 class BaseModel(db.Model):
     class BaseModel(db.Model):
