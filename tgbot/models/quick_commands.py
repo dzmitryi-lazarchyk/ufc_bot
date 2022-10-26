@@ -6,10 +6,15 @@ async def select_all_news():
     return all_news
 
 async def pick_new_news(new_news:set):
-    old_news = set(await News.query.gino.all())
-    result = new_news-old_news
+    old_news = await News.query.gino.all()
+    old_news_titles = set([news.title for news in old_news])
+    new_news_titles = set([news.title for news in new_news])
+
+    result_titles = new_news_titles-old_news_titles
+    result=[news for news in new_news if news.title in result_titles]
+
     if result:
         await News.delete.gino.all()
         for news in new_news:
-            news.create()
+            await news.create()
     return result

@@ -5,7 +5,7 @@ from tgbot.models.base_models import BaseModel
 
 class News(BaseModel):
     __tablename__ = 'news'
-    title = Column(String())
+    title = Column(String(), primary_key=True)
     link = Column(String())
     pubDate= Column(DateTime(timezone=True))
     description = Column(Text())

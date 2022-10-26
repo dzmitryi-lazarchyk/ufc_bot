@@ -7,7 +7,7 @@ from xml.etree.ElementTree import Element, tostring
 from tgbot.models.custom_models import News
 
 
-def get_news():
+async def get_news():
     u = urlopen(r'https://www.championat.com/rss/news/boxing/')
     doc = parse(u)
     all_news=[]
@@ -17,12 +17,16 @@ def get_news():
             if category.text == 'breaking':
                 struct_object= strptime(item.findtext('pubDate'),'%a, %d %b %Y %H:%M:%S %z')
                 pubDate = datetime.fromtimestamp(mktime(struct_object))
+                image = item.find('image')
+                if image:
+                    image_url=image.findtext('url')
+                else:
+                    image_url=None
                 news = News(title= item.findtext('title'),
                             link=item.findtext('link'),
                             pubDate = pubDate,
-                            #                                         Tue, 25 Oct 2022 19:11:24 +0300
-                            description = item.findtext('description'),
-                            image = item.findtext('image'),
+                            description = item.findtext('description').translate(item.findtext('description').maketrans('\n',' ')),
+                            image = image_url,
                             )
                 all_news.append(news)
                 break
@@ -32,22 +36,3 @@ def get_news():
     #           f'{news.link}\n'
     #           f'{type(news.pubDate)}\n\n')
     return all_news
-    # s = {'name': 'Den', 'shares': 70, 'price': 345.23}
-    # e = dict_to_xml('test', s)
-    # with open('dict_xml.xml', 'wb') as file:
-    #     file.write(tostring(e))
-    # with open('dict_xml.xml', 'wb') as file:
-    #     e.set('id', str(1234))
-    #      file.write(tostring(e))
-    # e = dict_to_xml_str('item', s)
-    # print(e)
-    # doc = parse('dict_xml.xml')
-    # root = doc.getroot()
-    # root.remove(root.find('shares'))
-    # e = Element('spam')
-    # e.text = 'fsdfdsf'
-    # root.insert(1, e)
-    # print(tostring(root))
-    # doc.write('dict_xml.xml', xml_declaration=True)
-
-get_news()
