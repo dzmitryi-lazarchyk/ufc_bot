@@ -56,9 +56,9 @@ async def main():
 
     # start
     try:
-        await db.set_bind(POSTGRES_URI)
-        await db.gino.create_all()
-        asyncio.create_task(scheduler(dp))
+        # await db.set_bind(POSTGRES_URI)
+        # await db.gino.create_all()
+        # asyncio.create_task(scheduler(dp))
         await dp.start_polling()
 
     finally:
