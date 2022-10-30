@@ -1,1 +1,1 @@
-web: python ufc_bot/bot.py
+web: python bot.py
