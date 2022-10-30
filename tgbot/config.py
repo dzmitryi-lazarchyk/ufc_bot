@@ -27,8 +27,8 @@ class Miscellaneous:
 @dataclass
 class Config:
     tg_bot: TgBot
-    db: DbConfig
-    misc: Miscellaneous
+    # db: DbConfig
+    # misc: Miscellaneous
 
 
 def load_config(path: str = None):
