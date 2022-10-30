@@ -1,1 +1,1 @@
-worker: python ufc_bot/bot.py
+web: python ufc_bot/bot.py
