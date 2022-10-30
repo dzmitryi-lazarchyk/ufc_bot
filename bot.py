@@ -50,9 +50,9 @@ async def main():
 
     bot['config'] = config
 
-    # register_all_middlewares(dp, config)
-    # register_all_filters(dp)
-    # register_all_handlers(dp)
+    register_all_middlewares(dp, config)
+    register_all_filters(dp)
+    register_all_handlers(dp)
 
     # start
     try:

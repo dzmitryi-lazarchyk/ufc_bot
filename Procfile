@@ -1,0 +1,1 @@
+worker: python ufc_bot/bot.py

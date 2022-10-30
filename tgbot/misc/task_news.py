@@ -38,7 +38,7 @@ async def news(dp:Dispatcher):
                     await dp.bot.send_photo(chat_id=chat_id, photo=news.image,
                                             caption=f'<b>{news.title}</b>\n' \
                                                     f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n' \
-                                                    f'{news.description}\n' \
+                                                    f'{news.description}\n\n' \
                                                     f'Подробнее:{news.link}\n\n')
                 else:
                     await dp.bot.send_message(chat_id=chat_id,
