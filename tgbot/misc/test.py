@@ -1,7 +1,7 @@
 import asyncio
 
 from tgbot.config import load_config
-from tgbot.misc.get_news import get_news
+from tgbot.misc.get_news import get_news_championat
 # from tgbot.models import quick_commands
 from tgbot.models.base_models import db
 from tgbot.models.custom_models import News
@@ -14,7 +14,7 @@ async def test():
     await db.gino.drop_all()
     await db.gino.create_all()
 
-    all_news = get_news()
+    all_news = await get_news_championat()
     for news in all_news:
         await news.create()
 

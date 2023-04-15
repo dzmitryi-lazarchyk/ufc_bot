@@ -45,7 +45,7 @@ async def main():
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
     dp = Dispatcher(bot, storage=storage)
 
-    # POSTGRES_URI = f"postgresql://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.database}"
+    POSTGRES_URI = f"postgresql://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.database}"
 
 
     bot['config'] = config
@@ -56,15 +56,15 @@ async def main():
 
     # start
     try:
-        # await db.set_bind(POSTGRES_URI)
-        # await db.gino.create_all()
-        # asyncio.create_task(scheduler(dp))
+        await db.set_bind(POSTGRES_URI)
+        await db.gino.create_all()
+        asyncio.create_task(scheduler(dp))
         await dp.start_polling()
 
     finally:
         await dp.storage.close()
         await dp.storage.wait_closed()
-        await bot.session.close()
+        await bot.close()
 
 
 if __name__ == '__main__':
