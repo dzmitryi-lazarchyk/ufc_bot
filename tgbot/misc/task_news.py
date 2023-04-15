@@ -9,7 +9,7 @@ from tgbot.misc.get_news import get_news_championat
 from tgbot.models.quick_commands import pick_new_news, select_all_news
 
 
-async def news(dp:Dispatcher):
+async def news(dp: Dispatcher):
     parse_news = await get_news_championat()
     if parse_news:
         new_news = await pick_new_news(parse_news)
@@ -37,29 +37,28 @@ async def news(dp:Dispatcher):
                 for news in new_news:
                     if news.image:
                         await dp.bot.send_photo(chat_id=chat_id, photo=news.image,
-                                                caption=f'<b>{news.title}</b>\n' \
-                                                        f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n' \
-                                                        f'{news.description}\n\n' \
+                                                caption=f'<u>{news.category}</u>\n' 
+                                                        f'<b>{news.title}</b>\n' 
+                                                        f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n' 
+                                                        f'{news.description}\n\n'
                                                         f'Подробнее:{news.link}\n\n')
                     else:
                         await dp.bot.send_message(chat_id=chat_id,
-                                                  text=f'<b>{news.title}</b>\n' \
-                                                       f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n' \
-                                                       f'{news.description}\n' \
+                                                  text=f'<u>{news.category}</u>\n'
+                                                       f'<b>{news.title}</b>\n'
+                                                       f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n'
+                                                       f'{news.description}\n'
                                                        f'Подробнее:{news.link}\n\n',
                                                   disable_web_page_preview=True)
 
 
-
-
-async def scheduler(dp:Dispatcher):
+async def scheduler(dp: Dispatcher):
     await news(dp)
     aioschedule.every().day.at('09:00').do(news, dp)
     aioschedule.every().day.at('12:00').do(news, dp)
     aioschedule.every().day.at('15:00').do(news, dp)
     aioschedule.every().day.at('18:00').do(news, dp)
     aioschedule.every().day.at('20:00').do(news, dp)
-    aioschedule.every().days()
 
     while True:
         await aioschedule.run_pending()

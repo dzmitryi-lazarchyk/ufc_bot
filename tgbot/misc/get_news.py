@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from time import strptime, mktime
 from urllib.request import urlopen
@@ -24,13 +25,9 @@ async def get_news_championat():
                         image_url = enclosure.get('url', default=None)
                     except AttributeError:
                         image_url = None
-                    # if enclosure:
-                    #     image_url = enclosure.get('url', default=None)
-                    #     print(image_url)
-                    # else:
-                    #     image_url = None
                     news = News(title= item.findtext('title'),
                                 link=item.findtext('link'),
+                                category=item.findall('category')[1].text,
                                 pubDate = pubDate,
                                 description = item.findtext('description').translate(item.findtext('description').maketrans('\n',' ')),
                                 image = image_url,
@@ -45,7 +42,6 @@ async def get_news_championat():
         return all_news
     else:
         return None
-
 
 
 
