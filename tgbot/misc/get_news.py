@@ -6,6 +6,9 @@ from urllib.request import urlopen,Request
 from xml.etree.ElementTree import parse
 from xml.etree.ElementTree import Element, tostring
 
+import requests
+from bs4 import BeautifulSoup
+
 from tgbot.models.custom_models import News
 
 
@@ -44,6 +47,14 @@ async def get_news_championat():
     else:
         return None
 
+async def get_image_bloodandsweat(link):
+    page = requests.get(link)
+    if page.status_code == 200:
+        soup = BeautifulSoup(page.text, 'html.parser')
+        img_tag = soup.find(name="img", srcset=True)
+        img = img_tag.get("src")
+        return img
+    return None
 async def get_news_bloodandsweat():
     url = r'https://www.bloodandsweat.ru/category/news/feed/'
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -77,4 +88,6 @@ async def get_news_bloodandsweat():
     else:
         return None
 
-
+if __name__ == "__main__":
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(get_image_bloodandsweat("https://www.bloodandsweat.ru/2023/04/slova-posle-boya-edson-barboza-3/"))
