@@ -1,17 +1,20 @@
 import asyncio
 import datetime
+from time import gmtime
 
 import aioschedule as aioschedule
 from aiogram import Dispatcher
+from pytz import timezone
 
 from tgbot.config import load_config
 from tgbot.misc.get_news import get_news_championat, get_news_bloodandsweat
+from tgbot.misc.rankings import renew_rankings
 from tgbot.models.quick_commands import pick_new_news, select_all_news
 
-
 async def news(dp: Dispatcher):
-    parse_news = await get_news_championat()
-    parse_news += await get_news_bloodandsweat()
+    parse_news_championat = await get_news_championat()
+    parse_news_bloodandsweat = await get_news_bloodandsweat()
+    parse_news = parse_news_championat + parse_news_bloodandsweat
     if parse_news:
         new_news = await pick_new_news(parse_news)
 
@@ -35,6 +38,7 @@ async def news(dp: Dispatcher):
 
             for chat_id in chats:
                 for news in new_news:
+                    print(news.pubDate)
                     if news.image:
                         await dp.bot.send_photo(chat_id=chat_id, photo=news.image,
                                                 caption=f'<u>{news.category}</u>\n' 
@@ -52,13 +56,17 @@ async def news(dp: Dispatcher):
                                                   disable_web_page_preview=True)
 
 
+async def rankings():
+    await renew_rankings()
 async def scheduler(dp: Dispatcher):
-    await news(dp)
-    aioschedule.every().day.at('09:00').do(news, dp)
-    aioschedule.every().day.at('12:00').do(news, dp)
-    aioschedule.every().day.at('15:00').do(news, dp)
-    aioschedule.every().day.at('18:00').do(news, dp)
-    aioschedule.every().day.at('20:00').do(news, dp)
+    # await rankings()
+    # await news(dp)
+    for time in ('09:00','12:00','15:00','18:00','20:00'):
+        aioschedule.every().tuesday.at(time).do(news, dp)
+        aioschedule.every().wednesday.at(time).do(news, dp)
+        aioschedule.every().thursday.at(time).do(news, dp)
+        aioschedule.every().friday.at(time).do(news, dp)
+        aioschedule.every().saturday.at(time).do(news, dp)
 
     while True:
         await aioschedule.run_pending()

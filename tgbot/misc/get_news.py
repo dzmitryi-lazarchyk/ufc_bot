@@ -1,5 +1,4 @@
 import asyncio
-from urllib import parse as prs
 from datetime import datetime
 from time import strptime, mktime
 from urllib.request import urlopen,Request
@@ -24,6 +23,8 @@ async def get_news_championat():
                 if category.text == 'breaking':
                     struct_object= strptime(item.findtext('pubDate'),'%a, %d %b %Y %H:%M:%S %z')
                     pubDate = datetime.fromtimestamp(mktime(struct_object))
+                    print(pubDate, end='')
+                    print(item.findtext('title'))
                     enclosure = item.find('enclosure')
                     try:
                         image_url = enclosure.get('url', default=None)
@@ -48,13 +49,17 @@ async def get_news_championat():
         return None
 
 async def get_image_bloodandsweat(link):
+    # Return image of the news with param. link
+    img = None
     page = requests.get(link)
     if page.status_code == 200:
         soup = BeautifulSoup(page.text, 'html.parser')
         img_tag = soup.find(name="img", srcset=True)
-        img = img_tag.get("src")
-        return img
-    return None
+        if img_tag:
+            img = img_tag.get("src")
+
+    return img
+
 async def get_news_bloodandsweat():
     url = r'https://www.bloodandsweat.ru/category/news/feed/'
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -70,18 +75,26 @@ async def get_news_bloodandsweat():
         doc = parse(u)
         all_news=[]
         for item in doc.iterfind('channel/item'):
+            # Get pubdate
             struct_object= strptime(item.findtext('pubDate'),'%a, %d %b %Y %H:%M:%S %z')
             pubDate = datetime.fromtimestamp(mktime(struct_object))
+            # pubDate = item.findtext('pubDate')
+            print(pubDate, end='')
+            print(item.findtext('title'))
+            # Description length
             description = item.findtext('description')
             if len(description) > 250:
                 description = description[:250] + "..."
+            # Get news image
+            link = item.findtext('link')
+            image = await get_image_bloodandsweat(link)
 
             news = News(title=item.findtext('title'),
-                        link=item.findtext('link'),
+                        link=link,
                         category=item.findtext('category'),
                         pubDate=pubDate,
-                        description=item.findtext('description'),
-                        image=None
+                        description=description,
+                        image=image,
                         )
             all_news.append(news)
         return all_news

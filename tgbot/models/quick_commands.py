@@ -1,4 +1,4 @@
-from tgbot.models.custom_models import News
+from tgbot.models.custom_models import News, Fighters
 
 
 async def select_all_news():
@@ -20,8 +20,18 @@ async def pick_new_news(new_news:set):
         await News.delete.gino.all()
         for news in new_news:
             await news.create()
-    # Send no more than 3 news
-    if len(result) > 3:
-        return result[-3:]
+    # Send no more than 5 news
+    if len(result) > 5:
+        return result[-5:]
     else:
         return result
+
+
+async def get_rankings():
+    all_fighters = await Fighters.query.gino.all()
+    return all_fighters
+async def get_ranks():
+    ranks = await Fighters.select('division').where(Fighters.id != 0).gino.all()
+    ranks = [rank[0] for rank in ranks]
+    return list(dict.fromkeys(ranks))
+
