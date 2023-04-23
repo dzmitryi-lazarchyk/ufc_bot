@@ -57,7 +57,6 @@ async def renew_rankings():
     soup = BeautifulSoup(page.text, 'html.parser')
     rankings = soup.find_all(name="div", attrs={"class": "view-grouping"})
     fighters = []
-    print(rankings[3])
     for ranking in rankings:
         division = ranking.find(name="div", attrs={"class": "view-grouping-header"})
         # Get rid of top ranks
@@ -67,12 +66,13 @@ async def renew_rankings():
             pass
             # Champion
             name = ranking.find("h5").text
-            rank = ranking.find("h6").text
+            rank = ranking.find("h6").text.strip()
             division = ranking.find("h4").text
             link = ranking.find("h5").find("a").get(key="href")
             fighter_info = await get_fighter_info(link=link)
             fighter = Fighters(
                 name=name,
+                link=url+link,
                 rank=rank,
                 division=division,
                 image=fighter_info['image'],
@@ -93,6 +93,7 @@ async def renew_rankings():
                 fighter_info = await get_fighter_info(link=link)
                 fighter = Fighters(
                     name=name,
+                    link=url+link,
                     rank=rank,
                     division=division,
                     image=fighter_info['image'],

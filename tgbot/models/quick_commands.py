@@ -30,8 +30,5 @@ async def pick_new_news(new_news:set):
 async def get_rankings():
     all_fighters = await Fighters.query.gino.all()
     return all_fighters
-async def get_ranks():
-    ranks = await Fighters.select('division').where(Fighters.id != 0).gino.all()
-    ranks = [rank[0] for rank in ranks]
-    return list(dict.fromkeys(ranks))
+
 
