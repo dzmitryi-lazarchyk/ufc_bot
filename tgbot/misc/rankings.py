@@ -1,11 +1,7 @@
-import asyncio
-
 import requests
 from bs4 import BeautifulSoup
 
-from tgbot.config import load_config
 from tgbot.models.custom_models import Fighters
-from tgbot.models.base_models import db
 
 url = "https://www.ufc.com"
 
@@ -52,44 +48,24 @@ async def get_fighter_info(link):
 
 
 async def renew_rankings():
-    await Fighters.delete.gino.all()
     page = requests.get(url=url+"/rankings", headers=headers)
-    soup = BeautifulSoup(page.text, 'html.parser')
-    rankings = soup.find_all(name="div", attrs={"class": "view-grouping"})
-    fighters = []
-    for ranking in rankings:
-        division = ranking.find(name="div", attrs={"class": "view-grouping-header"})
-        # Get rid of top ranks
-        if "Top Rank" in division.text:
-            continue
-        else:
-            pass
-            # Champion
-            name = ranking.find("h5").text
-            rank = ranking.find("h6").text.strip()
-            division = ranking.find("h4").text
-            link = ranking.find("h5").find("a").get(key="href")
-            fighter_info = await get_fighter_info(link=link)
-            fighter = Fighters(
-                name=name,
-                link=url+link,
-                rank=rank,
-                division=division,
-                image=fighter_info['image'],
-                nickname=fighter_info['nickname'],
-                wins_loses=fighter_info['wins_loses'],
-                stats=fighter_info['stats'],
-                last_fight_event=fighter_info['last_fight']['event'],
-                last_fight_date=fighter_info['last_fight']['date'],
-                last_fight_headline=fighter_info['last_fight']['headline'],
-            )
-            await fighter.create()
-            # Other fighters
-            for row in ranking.find_all("tr"):
-                name = row.find("td", attrs={"class": "views-field views-field-title"}).text
-                link = row.find("td", attrs={"class": "views-field views-field-title"}).find("a").get(key="href")
-                rank = row.find("td", attrs={"class": "views-field views-field-weight-class-rank"}).text.strip()
-
+    if page.status_code == 200:
+        await Fighters.delete.gino.all()
+        soup = BeautifulSoup(page.text, 'html.parser')
+        rankings = soup.find_all(name="div", attrs={"class": "view-grouping"})
+        fighters = []
+        for ranking in rankings:
+            division = ranking.find(name="div", attrs={"class": "view-grouping-header"})
+            # Get rid of top ranks
+            if "Top Rank" in division.text:
+                continue
+            else:
+                pass
+                # Champion
+                name = ranking.find("h5").text
+                rank = ranking.find("h6").text.strip()
+                division = ranking.find("h4").text
+                link = ranking.find("h5").find("a").get(key="href")
                 fighter_info = await get_fighter_info(link=link)
                 fighter = Fighters(
                     name=name,
@@ -105,4 +81,25 @@ async def renew_rankings():
                     last_fight_headline=fighter_info['last_fight']['headline'],
                 )
                 await fighter.create()
+                # Other fighters
+                for row in ranking.find_all("tr"):
+                    name = row.find("td", attrs={"class": "views-field views-field-title"}).text
+                    link = row.find("td", attrs={"class": "views-field views-field-title"}).find("a").get(key="href")
+                    rank = row.find("td", attrs={"class": "views-field views-field-weight-class-rank"}).text.strip()
+
+                    fighter_info = await get_fighter_info(link=link)
+                    fighter = Fighters(
+                        name=name,
+                        link=url+link,
+                        rank=rank,
+                        division=division,
+                        image=fighter_info['image'],
+                        nickname=fighter_info['nickname'],
+                        wins_loses=fighter_info['wins_loses'],
+                        stats=fighter_info['stats'],
+                        last_fight_event=fighter_info['last_fight']['event'],
+                        last_fight_date=fighter_info['last_fight']['date'],
+                        last_fight_headline=fighter_info['last_fight']['headline'],
+                    )
+                    await fighter.create()
 

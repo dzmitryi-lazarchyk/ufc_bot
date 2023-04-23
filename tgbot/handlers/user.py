@@ -1,26 +1,23 @@
-from copy import copy
 
 import aiogram.utils.exceptions
 from aiogram import Dispatcher, Bot
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMedia
-from aiogram.utils.callback_data import CallbackData
 
 from tgbot.keyboards.inline import divisions_keyboard, fighter_keyboard_constractor, fighter_callback
 from tgbot.models.custom_models import Fighters
-from tgbot.models.quick_commands import get_rankings
-
 
 
 async def user_start(message: Message):
     await message.reply(message.chat.id)
 
 
-async def rankings(msg:Message):
+async def rankings(msg: Message):
     # rankings = await get_rankings()
     # # await msg.answer("\n".join(rankings))
     await msg.answer(text="Выберите вес👇", reply_markup=divisions_keyboard)
 
-async def divisions(call:CallbackQuery):
+
+async def divisions(call: CallbackQuery):
     _, division = call.data.split(":")
     if division == "back":
         await call.message.edit_text("Выберите вес👇")
@@ -28,15 +25,15 @@ async def divisions(call:CallbackQuery):
     else:
         division_fighters = await Fighters.get_division_fighters(division=division)
         text = f"<i>Вес:{division}\n\n</i>" \
-               f"<b>{division_fighters[0].rank}. {division_fighters[0].name}</b>\n"+ \
-            "\n".join([f"{fighter.rank}. {fighter.name}" for fighter in division_fighters[1:]])
+               f"<b>{division_fighters[0].rank}. {division_fighters[0].name}</b>\n" + \
+               "\n".join([f"{fighter.rank}. {fighter.name}" for fighter in division_fighters[1:]])
         keyboard = InlineKeyboardMarkup(
-                row_width=2,
-                inline_keyboard=[
-                    [InlineKeyboardButton(text="Страница бойца", callback_data=f"fighter:{division}:by_one")],
-                    [InlineKeyboardButton(text="⬅️Сменить вес", callback_data=f"division:back")],
-                ]
-            )
+            row_width=2,
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Страница бойца", callback_data=f"fighter:{division}:by_one")],
+                [InlineKeyboardButton(text="⬅️Сменить вес", callback_data=f"division:back")],
+            ]
+        )
         try:
             await call.message.edit_text(text=text)
             await call.message.edit_reply_markup(reply_markup=keyboard)
@@ -44,13 +41,13 @@ async def divisions(call:CallbackQuery):
             await call.message.answer(text=text,
                                       reply_markup=keyboard)
 
-async def fighter(call:CallbackQuery):
+
+async def fighter(call: CallbackQuery):
     bot = Bot.get_current()
     msg = call.message
     chat_id = call.message.chat.id
 
     _, division, rank = call.data.split(":")
-
 
     if rank == "list":
         await call.message.delete()
@@ -81,7 +78,7 @@ async def fighter(call:CallbackQuery):
         if len(ranks) > 1:
             ranks = ranks[1:]
             for _ in range(0, len(ranks), 4):
-                if len(ranks)>3:
+                if len(ranks) > 3:
                     buttons = [InlineKeyboardButton(
                         text=rank,
                         callback_data=fighter_callback.new(division=division,
@@ -104,11 +101,11 @@ async def fighter(call:CallbackQuery):
         keyboard = fighter_keyboard_constractor(division, rank, next_rank, prev_rank)
         media = InputMedia(type='photo', media=fighter.image)
 
-
         await msg.edit_media(media=media)
 
         await msg.edit_caption(caption=fighter,
                                reply_markup=keyboard)
+
 
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")

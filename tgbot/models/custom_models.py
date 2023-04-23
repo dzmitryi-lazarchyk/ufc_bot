@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, DateTime, Text, sql, Integer
+from sqlalchemy import Column, String, DateTime,\
+    Text, sql, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 
 from tgbot.models.base_models import BaseModel
@@ -90,4 +91,30 @@ class Fighters(BaseModel):
         ranks = await Fighters.select("rank").where(Fighters.division == division).gino.all()
         ranks = [rank[0] for rank in ranks]
         return ranks
+
+
+class Events(BaseModel):
+    __tablename__='events'
+    date = Column(String())
+    title = Column(String(), primary_key=True)
+    link = Column(String())
+    location = Column(String())
+    status = Column(String())
+
+
+
+class UpcomingMatches(BaseModel):
+    __tablename__ = 'upcoming_matches'
+    id = Column(Integer(), primary_key=True, autoincrement=True)
+    card = Column(String())
+    first_competitor = Column(String())
+    first_competitor_wins_loses = Column(String())
+    second_competitor = Column(String())
+    second_competitor_wins_loses = Column(String())
+    match_number = Column(Integer())
+    odds = Column(String())
+    event_title = Column(String(), ForeignKey(column=Events.title,
+                                        onupdate='CASCADE'))
+
+    
 
