@@ -18,13 +18,6 @@ def fighter_keyboard_constractor(division, current_rank, next_rank, prev_rank):
     keyboard = InlineKeyboardMarkup(
         row_width=3,
         inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="Показать списком",
-                    callback_data=fighter_callback.new(division=division,
-                                                       to_fighter="list")
-
-                )],
                 [
                     InlineKeyboardButton(
                         text="⬅️",
@@ -41,8 +34,33 @@ def fighter_keyboard_constractor(division, current_rank, next_rank, prev_rank):
                         callback_data=fighter_callback.new(division=division,
                                                            to_fighter=next_rank),
                     ),
-                ]
+                ],
+            [
+                InlineKeyboardButton(
+                    text="Показать списком",
+                    callback_data=fighter_callback.new(division=division,
+                                                       to_fighter="list")
+
+                )],
         ]
     )
     return keyboard
 
+
+upcoming_event_callback =CallbackData("upcoming_event", "to_event")
+def upcoming_event_keyboard_constractor(next_event, prev_event):
+    keyboard = InlineKeyboardMarkup(
+        row_width=2,
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⬅️",
+                                 callback_data=upcoming_event_callback.new(to_event=prev_event)),
+            InlineKeyboardButton(text="➡️",
+                                 callback_data=upcoming_event_callback.new(to_event=next_event)),
+             ],
+            [InlineKeyboardButton(text="Показать списком",
+                                  callback_data=upcoming_event_callback.new(to_event="list"))
+             ]
+        ]
+    )
+
+    return keyboard

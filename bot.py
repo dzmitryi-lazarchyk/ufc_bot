@@ -48,6 +48,7 @@ async def main():
     await dp.bot.set_my_commands([
         types.bot_command.BotCommand('start', 'Запустить бота'),
         types.bot_command.BotCommand('rankings', 'Рейтинги бойцов'),
+        types.bot_command.BotCommand('upcoming_events', 'Предстоящие турниры'),
     ])
 
 

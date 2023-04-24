@@ -57,7 +57,7 @@ async def get_upcoming_matches(link, event):
                     second_competitor_wins_loses=second_competitor_wins_loses,
                     match_number=match_number,
                     odds=odds,
-                    event_title=event.title,
+                    event_title=event.event_title,
                 )
                 await match.create()
 
@@ -66,6 +66,7 @@ async def events():
     page = requests.get(url=url, headers=headers)
     if page.status_code == 200:
         await Events.delete.gino.all()
+        await UpcomingMatches.delete.gino.all()
         soup = BeautifulSoup(page.text, 'html.parser')
         tables = soup.find_all(name="div", attrs={"class":"ResponsiveTable"})
         for table in tables:
@@ -73,14 +74,14 @@ async def events():
             events = table.find_all(name="tr", attrs={"class": "Table__TR Table__TR--sm Table__even"})
             for event in events:
                 date = event.find(name="td", attrs={"class": "date__col Table__TD"}).text
-                title = event.find(name="td", attrs={"class": "event__col Table__TD"}).text
+                event_title = event.find(name="td", attrs={"class": "event__col Table__TD"}).text
                 link = "https://www.espn.com" + event.find(name="a", attrs={"class": "AnchorLink"}).get("href")
                 location = event.find(name="td", attrs={"class": "location__col Table__TD"}).text or "Unknown"
                 match table_title:
                     case "Scheduled Events" | "This Week's Events":
                         event_obj = Events(
                             date=date,
-                            title=title,
+                            event_title=event_title,
                             location=location,
                             link=link,
                             status="Upcoming",
@@ -91,7 +92,7 @@ async def events():
                     case "Past Results":
                         event_obj = Events(
                             date=date,
-                            title=title,
+                            event_title=event_title,
                             location=location,
                             link=link,
                             status="Past",

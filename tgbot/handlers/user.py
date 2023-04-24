@@ -3,8 +3,9 @@ import aiogram.utils.exceptions
 from aiogram import Dispatcher, Bot
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMedia
 
-from tgbot.keyboards.inline import divisions_keyboard, fighter_keyboard_constractor, fighter_callback
-from tgbot.models.custom_models import Fighters
+from tgbot.keyboards.inline import divisions_keyboard, fighter_keyboard_constractor, fighter_callback, \
+    upcoming_event_keyboard_constractor
+from tgbot.models.custom_models import Fighters, Events, UpcomingMatches
 
 
 async def user_start(message: Message):
@@ -106,9 +107,43 @@ async def fighter(call: CallbackQuery):
         await msg.edit_caption(caption=fighter,
                                reply_markup=keyboard)
 
+async def upcoming_events(msg: Message):
+    events = await Events.get_upcoming_events()
+    context = "\n".join([event for event in events])
+    text = f"Предстоящие турниры:\n\n" \
+           f"{context}"
+    await msg.answer(text=text,
+                     reply_markup=InlineKeyboardMarkup(
+                         row_width=1,
+                         inline_keyboard=[
+                                 [InlineKeyboardButton(text="По одному",
+                                                       callback_data="upcoming_event:by_one")]
+                         ]
+                     ))
+
+async def upcoming_event(call: CallbackQuery):
+    _, to_event = call.data.split(":")
+    if to_event == "by_one":
+        event = await Events.get_first_upcoming_event()
+    elif to_event == "list":
+        await call.message.delete()
+        await upcoming_events(call.message)
+    else:
+        event = await Events.get_event(event_id=int(to_event))
+    matches = await UpcomingMatches.get_matches_for_event(event=event)
+    main_card = "Главнай кадр:\n"+"\n".join([match.__str__() for match in matches if match.card == "Main Card"])
+    prelims = "Прелимы:\n"+"\n".join([match.__str__() for match in matches if match.card == "Prelims"])
+    text = f"{event}\n\n" \
+           f"{main_card}\n\n" \
+           f"{prelims}"
+    await call.message.edit_text(text=text, disable_web_page_preview=True)
+    next_event, prev_event = await Events.get_next_previous(event.id)
+    await call.message.edit_reply_markup(reply_markup=upcoming_event_keyboard_constractor(next_event, prev_event))
+
 
 def register_user(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], state="*")
+    # Rankings
     dp.register_message_handler(rankings, commands=["rankings"], state="*")
     dp.register_callback_query_handler(divisions,
                                        lambda callback_querry: callback_querry.data.startswith('division'),
@@ -116,3 +151,7 @@ def register_user(dp: Dispatcher):
     dp.register_callback_query_handler(fighter,
                                        lambda callback_querry: callback_querry.data.startswith('fighter'),
                                        state="*")
+    # Upcoming events
+    dp.register_message_handler(upcoming_events, commands=["upcoming_events"], state="*")
+    dp.register_callback_query_handler(upcoming_event,
+                                       lambda callback_query: callback_query.data.startswith('upcoming_event'))

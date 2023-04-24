@@ -28,14 +28,14 @@ async def news(dp: Dispatcher):
                         if news.image:
                             await dp.bot.send_photo(chat_id=chat_id, photo=news.image,
                                                     caption=f'<u>{news.category}</u>\n' 
-                                                            f'<b>{news.title}</b>\n' 
+                                                            f'<b>{news.event_title}</b>\n' 
                                                             f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n' 
                                                             f'{news.description}\n\n'
                                                             f'Подробнее:{news.link}\n\n')
                         else:
                             await dp.bot.send_message(chat_id=chat_id,
                                                       text=f'<u>{news.category}</u>\n'
-                                                           f'<b>{news.title}</b>\n'
+                                                           f'<b>{news.event_title}</b>\n'
                                                            f'<i>{news.pubDate.strftime("%d.%m %H:%M")}</i>\n\n'
                                                            f'{news.description}\n\n'
                                                            f'Подробнее:{news.link}\n\n',
@@ -45,7 +45,7 @@ async def news(dp: Dispatcher):
 async def rankings():
     await renew_rankings()
 async def scheduler(dp: Dispatcher):
-    await events()
+    # await events()
     # await rankings()
     # await news(dp)
     for time in ('09:00','12:00','15:00','18:00','20:00'):
