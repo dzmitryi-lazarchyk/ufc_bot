@@ -1,13 +1,12 @@
 FROM python:3.9
-ENV BOT_NAME=$BOT_NAME
 
-WORKDIR ufc_bot/
+COPY . /src
+WORKDIR src/
 
-COPY requirements.txt ufc_bot/requirements.txt
-RUN pip install -r ufc_bot/requirements.txt
-ADD . .
+COPY requirements.txt /src
+RUN pip install -r requirements.txt
+CMD [ "python", "./bot.py"
 
-EXPOSE 80/tcp
 
 
 
