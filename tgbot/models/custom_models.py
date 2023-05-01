@@ -131,7 +131,7 @@ class Events(BaseModel):
         return event
 
     @classmethod
-    async def get_next_previous(cls,  event_id: int):
+    async def get_next_previous_upcoming(cls, event_id: int):
         # Get events
         upcoming_events = await Events.select("id").where(Events.status == "Upcoming").gino.all()
         upcoming_events_ids = [event[0] for  event in upcoming_events]
@@ -149,6 +149,40 @@ class Events(BaseModel):
             prev_event = upcoming_events_ids[indx_prev]
         except IndexError:
             prev_event = upcoming_events_ids[-1]
+
+        return next_event, prev_event
+
+    @classmethod
+    async def get_past_events(cls):
+        upcoming_events = await Events.select("event_title").where(Events.status == "Past").gino.all()
+        upcoming_events = [event[0] for event in upcoming_events]
+        return upcoming_events
+
+    @classmethod
+    async def get_first_past_event(cls):
+        first_event = await Events.query.where(Events.status == "Past").gino.first()
+
+        return first_event
+
+    @classmethod
+    async def get_next_previous_past(cls, event_id: int):
+        # Get events
+        past_events = await Events.select("id").where(Events.status == "Past").gino.all()
+        past_events_ids = [event[0] for event in past_events]
+        # Get indexes of next and previous events
+        indx_event = past_events_ids.index(event_id)
+        indx_next = indx_event + 1
+        indx_prev = indx_event - 1
+        # Get ranks
+        try:
+            next_event = past_events_ids[indx_next]
+        except IndexError:
+            next_event = past_events_ids[0]
+
+        try:
+            prev_event = past_events_ids[indx_prev]
+        except IndexError:
+            prev_event = past_events_ids[-1]
 
         return next_event, prev_event
 
@@ -195,4 +229,44 @@ class UpcomingMatches(BaseModel):
         matches = await UpcomingMatches.query.where(UpcomingMatches.event_title == event.event_title).gino.all()
         return matches
 
+class PastMatches(BaseModel):
+    __tablename__ = 'past_matches'
+    id = Column(Integer(), primary_key=True, autoincrement=True)
+    card = Column(String())
+    first_competitor = Column(String())
+    first_competitor_wins_loses = Column(String())
+    second_competitor = Column(String())
+    second_competitor_wins_loses = Column(String())
+    winner = Column(Integer()) # 1 if first, 2 if second, 0 if draw
+    match_result = Column(String())
+    match_result_how = Column(String())
+    match_result_when = Column(String())
+    event_title = Column(String(), ForeignKey(column=Events.event_title,
+                                              onupdate='CASCADE',
+                                              ondelete='SET NULL'))
+
+    def __str__(self):
+        text = str()
+        if self.winner == 1:
+            text = f"🏅<b>{self.first_competitor}</b>({self.first_competitor_wins_loses}) vs. " \
+                   f"{self.second_competitor}({self.second_competitor_wins_loses})\n" \
+                   f"<i>{self.match_result}, {self.match_result_how}, {self.match_result_when}</i>"
+        elif self.winner == 2:
+            text = f"{self.first_competitor}({self.first_competitor_wins_loses}) vs. " \
+                   f"🏅<b>{self.second_competitor}({self.second_competitor_wins_loses})</b>\n" \
+                   f"<i>{self.match_result}, {self.match_result_how}, {self.match_result_when}</i>"
+        else:
+            text = f"{self.first_competitor}({self.first_competitor_wins_loses}) vs. " \
+                   f"{self.second_competitor}({self.second_competitor_wins_loses})\n" \
+                   f"<i>{self.match_result}, {self.match_result_when}</i>"
+
+        return text
+
+
+
+    @classmethod
+    async def get_matches_for_event(cls, event:Events):
+        matches = await PastMatches.query.where(PastMatches.event_title == event.event_title).gino.all()
+
+        return matches
 

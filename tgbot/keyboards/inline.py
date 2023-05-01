@@ -64,3 +64,21 @@ def upcoming_event_keyboard_constractor(next_event, prev_event):
     )
 
     return keyboard
+
+past_event_callback =CallbackData("past_event", "to_event")
+def past_event_keyboard_constractor(next_event, prev_event):
+    keyboard = InlineKeyboardMarkup(
+        row_width=2,
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⬅️",
+                                 callback_data=past_event_callback.new(to_event=prev_event)),
+            InlineKeyboardButton(text="➡️",
+                                 callback_data=past_event_callback.new(to_event=next_event)),
+             ],
+            [InlineKeyboardButton(text="Показать списком",
+                                  callback_data=past_event_callback.new(to_event="list"))
+             ]
+        ]
+    )
+
+    return keyboard

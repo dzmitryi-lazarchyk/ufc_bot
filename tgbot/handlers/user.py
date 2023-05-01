@@ -4,8 +4,8 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMedia
 
 from tgbot.keyboards.inline import divisions_keyboard, fighter_keyboard_constractor, fighter_callback, \
-    upcoming_event_keyboard_constractor
-from tgbot.models.custom_models import Fighters, Events, UpcomingMatches
+    upcoming_event_keyboard_constractor, past_event_keyboard_constractor
+from tgbot.models.custom_models import Fighters, Events, UpcomingMatches, PastMatches
 
 
 async def user_start(message: Message):
@@ -121,6 +121,7 @@ async def upcoming_events(msg: Message):
                          ]
                      ))
 
+
 async def upcoming_event(call: CallbackQuery):
     _, to_event = call.data.split(":")
     if to_event == "by_one":
@@ -128,6 +129,7 @@ async def upcoming_event(call: CallbackQuery):
     elif to_event == "list":
         await call.message.delete()
         await upcoming_events(call.message)
+        return
     else:
         event = await Events.get_event(event_id=int(to_event))
     matches = await UpcomingMatches.get_matches_for_event(event=event)
@@ -137,8 +139,45 @@ async def upcoming_event(call: CallbackQuery):
            f"{main_card}\n\n" \
            f"{prelims}"
     await call.message.edit_text(text=text, disable_web_page_preview=True)
-    next_event, prev_event = await Events.get_next_previous(event.id)
+    next_event, prev_event = await Events.get_next_previous_upcoming(event.id)
     await call.message.edit_reply_markup(reply_markup=upcoming_event_keyboard_constractor(next_event, prev_event))
+
+async def past_events(msg: Message):
+    events = await Events.get_past_events()
+    context = "\n".join([event for event in events])
+    text = f"Прошедшие турниры:\n\n" \
+           f"{context}"
+    await msg.answer(text=text,
+                     reply_markup=InlineKeyboardMarkup(
+                         row_width=1,
+                         inline_keyboard=[
+                             [InlineKeyboardButton(text="По одному",
+                                                   callback_data="past_event:by_one")]
+                         ]
+                     ))
+
+async def past_event(call: CallbackQuery):
+    _, to_event = call.data.split(":")
+    if to_event == "by_one":
+        event = await Events.get_first_past_event()
+    elif to_event == "list":
+        await call.message.delete()
+        await past_events(call.message)
+        return
+    else:
+        event = await Events.get_event(event_id=int(to_event))
+    matches = await PastMatches.get_matches_for_event(event=event)
+    main_card = "Главнай кадр:\n"+"\n".join([f"{number}.{match.__str__()}" for number, match in
+                                             enumerate(matches, start=1) if match.card == "Main Card"])
+    prelims = "Прелимы:\n"+"\n".join([f"{number}.{match.__str__()}" for number, match in
+                                             enumerate(matches, start=1) if match.card == "Prelims"])
+    text = f"{event}\n\n" \
+           f"{main_card}\n\n" \
+           f"{prelims}"
+    await call.message.edit_text(text=text, disable_web_page_preview=True)
+    next_event, prev_event = await Events.get_next_previous_past(event.id)
+    await call.message.edit_reply_markup(reply_markup=past_event_keyboard_constractor(next_event, prev_event))
+
 
 
 def register_user(dp: Dispatcher):
@@ -155,3 +194,7 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(upcoming_events, commands=["upcoming_events"], state="*")
     dp.register_callback_query_handler(upcoming_event,
                                        lambda callback_query: callback_query.data.startswith('upcoming_event'))
+    # Past events
+    dp.register_message_handler(past_events, commands=["past_events"], state="*")
+    dp.register_callback_query_handler(past_event,
+                                       lambda callback_query: callback_query.data.startswith('past_event'))

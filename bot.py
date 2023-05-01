@@ -12,6 +12,7 @@ from tgbot.handlers.admin import register_admin
 from tgbot.handlers.echo import register_echo
 from tgbot.handlers.user import register_user
 from tgbot.middlewares.environment import EnvironmentMiddleware
+from tgbot.middlewares.my_middleware import MyMiddleware
 from tgbot.misc.tasks import scheduler
 from tgbot.models.base_models import db
 
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 def register_all_middlewares(dp, config):
     dp.setup_middleware(EnvironmentMiddleware(config=config))
+    dp.setup_middleware(MyMiddleware())
 
 
 def register_all_filters(dp):
@@ -30,7 +32,7 @@ def register_all_handlers(dp):
     register_admin(dp)
     register_user(dp)
 
-    register_echo(dp)
+    # register_echo(dp)
 
 
 async def main():
@@ -49,11 +51,12 @@ async def main():
         types.bot_command.BotCommand('start', 'Запустить бота'),
         types.bot_command.BotCommand('rankings', 'Рейтинги бойцов'),
         types.bot_command.BotCommand('upcoming_events', 'Предстоящие турниры'),
+        types.bot_command.BotCommand('past_events', 'Прошедшие турниры'),
     ])
 
 
-    POSTGRES_URI = f"postgres://O5Vh9BiqkS:Bz2igDFU0NTv5uvlxPOSmtYU@SharedPostgreSQL01A.back4app.com:5433/0e495242fcdf4945a3c0f4b9f25144eb"
-    # POSTGRES_URI = f"postgresql://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.database}"
+    # POSTGRES_URI = f"postgres://O5Vh9BiqkS:Bz2igDFU0NTv5uvlxPOSmtYU@SharedPostgreSQL01A.back4app.com:5433/0e495242fcdf4945a3c0f4b9f25144eb"
+    POSTGRES_URI = f"postgresql://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.database}"
 
     bot['config'] = config
 
