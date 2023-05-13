@@ -80,6 +80,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
+        print("Starting")
         keep_alive()
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
