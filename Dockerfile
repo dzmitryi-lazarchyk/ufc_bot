@@ -6,7 +6,7 @@ WORKDIR src/
 COPY requirements.txt /src
 RUN pip install -r requirements.txt
 
-EXPOSE 8080
+EXPOSE 80
 
-CMD ["python", "-b", "0.0.0.0:8080", "src:bot"]
+CMD ["python", "src:bot"]
 

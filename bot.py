@@ -15,6 +15,7 @@ from tgbot.middlewares.environment import EnvironmentMiddleware
 from tgbot.middlewares.my_middleware import MyMiddleware
 from tgbot.misc.tasks import scheduler
 from tgbot.models.base_models import db
+from web_app.keep_alive import keep_alive
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
+        keep_alive()
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
         logger.error("Bot stopped!")
