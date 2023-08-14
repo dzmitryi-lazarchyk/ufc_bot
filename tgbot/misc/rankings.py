@@ -60,33 +60,12 @@ async def renew_rankings():
             if "Top Rank" in division.text:
                 continue
             else:
-                pass
-                # Champion
-                name = ranking.find("h5").text
-                rank = ranking.find("h6").text.strip()
-                division = ranking.find("h4").text
-                link = ranking.find("h5").find("a").get(key="href")
-                fighter_info = await get_fighter_info(link=link)
-                fighter = Fighters(
-                    name=name,
-                    link=url+link,
-                    rank=rank,
-                    division=division,
-                    image=fighter_info['image'],
-                    nickname=fighter_info['nickname'],
-                    wins_loses=fighter_info['wins_loses'],
-                    stats=fighter_info['stats'],
-                    last_fight_event=fighter_info['last_fight']['event'],
-                    last_fight_date=fighter_info['last_fight']['date'],
-                    last_fight_headline=fighter_info['last_fight']['headline'],
-                )
-                await fighter.create()
-                # Other fighters
-                for row in ranking.find_all("tr"):
-                    name = row.find("td", attrs={"class": "views-field views-field-title"}).text
-                    link = row.find("td", attrs={"class": "views-field views-field-title"}).find("a").get(key="href")
-                    rank = row.find("td", attrs={"class": "views-field views-field-weight-class-rank"}).text.strip()
-
+                try:
+                    # Champion
+                    name = ranking.find("h5").text
+                    rank = ranking.find("h6").text.strip()
+                    division = ranking.find("h4").text
+                    link = ranking.find("h5").find("a").get(key="href")
                     fighter_info = await get_fighter_info(link=link)
                     fighter = Fighters(
                         name=name,
@@ -102,4 +81,27 @@ async def renew_rankings():
                         last_fight_headline=fighter_info['last_fight']['headline'],
                     )
                     await fighter.create()
+                    # Other fighters
+                    for row in ranking.find_all("tr"):
+                        name = row.find("td", attrs={"class": "views-field views-field-title"}).text
+                        link = row.find("td", attrs={"class": "views-field views-field-title"}).find("a").get(key="href")
+                        rank = row.find("td", attrs={"class": "views-field views-field-weight-class-rank"}).text.strip()
+
+                        fighter_info = await get_fighter_info(link=link)
+                        fighter = Fighters(
+                            name=name,
+                            link=url+link,
+                            rank=rank,
+                            division=division,
+                            image=fighter_info['image'],
+                            nickname=fighter_info['nickname'],
+                            wins_loses=fighter_info['wins_loses'],
+                            stats=fighter_info['stats'],
+                            last_fight_event=fighter_info['last_fight']['event'],
+                            last_fight_date=fighter_info['last_fight']['date'],
+                            last_fight_headline=fighter_info['last_fight']['headline'],
+                        )
+                        await fighter.create()
+                except AttributeError:
+                    continue
 

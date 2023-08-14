@@ -56,8 +56,7 @@ async def main():
     ])
 
 
-    POSTGRES_URI = f"postgres://O5Vh9BiqkS:Bz2igDFU0NTv5uvlxPOSmtYU@SharedPostgreSQL01A.back4app.com:5433/0e495242fcdf4945a3c0f4b9f25144eb"
-    # POSTGRES_URI = f"postgresql://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.database}"
+    POSTGRES_URI = f"postgresql://{config.db.user}:{config.db.password}@{config.db.host}/{config.db.database}"
 
     bot['config'] = config
 

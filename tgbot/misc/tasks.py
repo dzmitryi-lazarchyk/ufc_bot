@@ -24,7 +24,6 @@ async def news(dp: Dispatcher):
             if chats:
                 for chat_id in chats:
                     for news in new_news:
-                        print(news.pubDate)
                         if news.image:
                             await dp.bot.send_photo(chat_id=chat_id, photo=news.image,
                                                     caption=f'<u>{news.category}</u>\n' 
@@ -47,13 +46,16 @@ async def rankings():
 async def scheduler(dp: Dispatcher):
     # await events()
     # await rankings()
-    # await news(dp)
+    await news(dp)
     for time in ('09:00','12:00','15:00','18:00','20:00'):
         aioschedule.every().tuesday.at(time).do(news, dp)
         aioschedule.every().wednesday.at(time).do(news, dp)
         aioschedule.every().thursday.at(time).do(news, dp)
         aioschedule.every().friday.at(time).do(news, dp)
         aioschedule.every().saturday.at(time).do(news, dp)
+
+    aioschedule.every().day.do(events, dp)
+    aioschedule.every().wednesday.do(rankings, dp)
 
     while True:
         await aioschedule.run_pending()
