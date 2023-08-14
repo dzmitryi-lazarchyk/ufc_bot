@@ -44,8 +44,8 @@ async def news(dp: Dispatcher):
 async def rankings():
     await renew_rankings()
 async def scheduler(dp: Dispatcher):
-    # await events()
-    # await rankings()
+    await events()
+    await rankings()
     await news(dp)
     for time in ('09:00','12:00','15:00','18:00','20:00'):
         aioschedule.every().tuesday.at(time).do(news, dp)
