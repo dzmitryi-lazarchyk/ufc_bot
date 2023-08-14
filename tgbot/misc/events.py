@@ -142,26 +142,26 @@ async def events():
                 event_title = event.find(name="td", attrs={"class": "event__col Table__TD"}).text
                 link = "https://www.espn.com" + event.find(name="a", attrs={"class": "AnchorLink"}).get("href")
                 location = event.find(name="td", attrs={"class": "location__col Table__TD"}).text or "Unknown"
-                match table_title:
-                    case "Scheduled Events" | "This Week's Events":
-                        event_obj = Events(
-                            date=date,
-                            event_title=event_title,
-                            location=location,
-                            link=link,
-                            status="Upcoming",
-                        )
-                        await event_obj.create()
 
-                        await get_upcoming_matches(link, event_obj)
-                    case "Past Results":
-                        event_obj = Events(
-                            date=date,
-                            event_title=event_title,
-                            location=location,
-                            link=link,
-                            status="Past",
-                        )
-                        await event_obj.create()
+                if table_title == "Scheduled Events" or table_title == "This Week's Events":
+                    event_obj = Events(
+                        date=date,
+                        event_title=event_title,
+                        location=location,
+                        link=link,
+                        status="Upcoming",
+                    )
+                    await event_obj.create()
 
-                        await get_past_matches(link, event_obj)
+                    await get_upcoming_matches(link, event_obj)
+                elif table_title == "Past Results":
+                    event_obj = Events(
+                        date=date,
+                        event_title=event_title,
+                        location=location,
+                        link=link,
+                        status="Past",
+                    )
+                    await event_obj.create()
+
+                    await get_past_matches(link, event_obj)
