@@ -46,13 +46,13 @@ async def rankings():
 async def scheduler(dp: Dispatcher):
     # await events()
     # await rankings()
-    await news(dp)
-    for time in ('09:00','12:00','15:00','18:00','20:00'):
-        aioschedule.every().tuesday.at(time).do(news, dp)
-        aioschedule.every().wednesday.at(time).do(news, dp)
-        aioschedule.every().thursday.at(time).do(news, dp)
-        aioschedule.every().friday.at(time).do(news, dp)
-        aioschedule.every().saturday.at(time).do(news, dp)
+    # await news(dp)
+    # for time in ('09:00','12:00','15:00','18:00','20:00'):
+    #     aioschedule.every().tuesday.at(time).do(news, dp)
+    #     aioschedule.every().wednesday.at(time).do(news, dp)
+    #     aioschedule.every().thursday.at(time).do(news, dp)
+    #     aioschedule.every().friday.at(time).do(news, dp)
+    #     aioschedule.every().saturday.at(time).do(news, dp)
 
     aioschedule.every().day.do(events, dp)
     aioschedule.every().wednesday.do(rankings, dp)
