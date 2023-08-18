@@ -54,8 +54,8 @@ async def scheduler(dp: Dispatcher):
     #     aioschedule.every().friday.at(time).do(news, dp)
     #     aioschedule.every().saturday.at(time).do(news, dp)
 
-    aioschedule.every().day.at("18:30").do(events, dp)
-    aioschedule.every().wednesday.do(rankings, dp)
+    aioschedule.every().day.at("18:40").do(events)
+    aioschedule.every().day.at("18:45").do(rankings)
 
     while True:
         await aioschedule.run_pending()
