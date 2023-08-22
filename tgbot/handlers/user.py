@@ -5,7 +5,7 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, C
 
 from tgbot.keyboards.inline import divisions_keyboard, fighter_keyboard_constractor, fighter_callback, \
     upcoming_event_keyboard_constractor, past_event_keyboard_constractor
-from tgbot.models.custom_models import Fighters, Events, UpcomingMatches, PastMatches
+from tgbot.models.custom_models import Fighters, Events, UpcomingMatches, PastMatches, Users
 
 
 async def user_start(message: Message):
@@ -178,6 +178,54 @@ async def past_event(call: CallbackQuery):
     next_event, prev_event = await Events.get_next_previous_past(event.id)
     await call.message.edit_reply_markup(reply_markup=past_event_keyboard_constractor(next_event, prev_event))
 
+async def settings_news(msg: Message):
+    user_id = msg.from_user.id
+    user = await Users.get(user_id)
+
+    if user.receive_news:
+        text = "Вы получаете новости."
+        reply_markup = InlineKeyboardMarkup(
+            row_width=1,
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Отключить новости", callback_data='set_news:disable')]
+            ]
+        )
+    else:
+        text = "Вы не получаете новости."
+        reply_markup = InlineKeyboardMarkup(
+            row_width=1,
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Включить новости", callback_data='set_news:enable')]
+            ]
+        )
+
+    await msg.answer(text=text, reply_markup=reply_markup)
+
+async def set_news(call: CallbackQuery):
+    user_id = call.from_user.id
+    _, action = call.data.split(':')
+
+    if action == 'enable':
+        user = await Users.get(user_id)
+        await user.update(receive_news=True).apply()
+        await call.message.edit_text('Вы получаете новости.')
+        await call.message.edit_reply_markup(InlineKeyboardMarkup(
+            row_width=1,
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Отключить новости", callback_data='set_news:disable')]
+            ]
+        ))
+
+    else:
+        user = await Users.get(user_id)
+        await user.update(receive_news=False).apply()
+        await call.message.edit_text('Вы не получаете новости.')
+        await call.message.edit_reply_markup(InlineKeyboardMarkup(
+            row_width=1,
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Включить новости", callback_data='set_news:enable')]
+            ]
+        ))
 
 
 def register_user(dp: Dispatcher):
@@ -198,3 +246,7 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(past_events, commands=["past_events"], state="*")
     dp.register_callback_query_handler(past_event,
                                        lambda callback_query: callback_query.data.startswith('past_event'))
+    #Set news
+    dp.register_message_handler(settings_news, commands=["settings_news"], state="*")
+    dp.register_callback_query_handler(set_news,
+                                       lambda callback_query: callback_query.data.startswith('set_news'))

@@ -1,8 +1,21 @@
 from sqlalchemy import Column, String, DateTime,\
-    Text, sql, Integer, ForeignKey
+    Text, sql, Integer, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 
 from tgbot.models.base_models import BaseModel
+
+
+class Users(BaseModel):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String())
+    receive_news = Column(Boolean(), default=False)
+
+    @classmethod
+    async def get_Users(cls):
+        users = await Users.query.gino.all()
+        return users
 
 
 class News(BaseModel):

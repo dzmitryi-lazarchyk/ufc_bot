@@ -1,4 +1,5 @@
 import requests
+from asyncpg import UniqueViolationError
 from bs4 import BeautifulSoup
 
 from tgbot.models.custom_models import Events, UpcomingMatches, PastMatches
@@ -159,6 +160,9 @@ async def events():
                         link=link,
                         status="Past",
                     )
-                    await event_obj.create()
+                    try:
+                        await event_obj.create()
+                    except UniqueViolationError:
+                        pass
 
                     await get_past_matches(link, event_obj)

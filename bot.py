@@ -12,7 +12,7 @@ from tgbot.handlers.admin import register_admin
 from tgbot.handlers.echo import register_echo
 from tgbot.handlers.user import register_user
 from tgbot.middlewares.environment import EnvironmentMiddleware
-from tgbot.middlewares.my_middleware import MyMiddleware
+from tgbot.middlewares.my_middleware import MyMiddleware, ACLMiddleware
 from tgbot.misc.tasks import scheduler
 from tgbot.models.base_models import db
 from web_app.keep_alive import keep_alive
@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 def register_all_middlewares(dp, config):
     dp.setup_middleware(EnvironmentMiddleware(config=config))
     dp.setup_middleware(MyMiddleware())
+    dp.setup_middleware(ACLMiddleware())
 
 
 def register_all_filters(dp):
@@ -53,6 +54,7 @@ async def main():
         types.bot_command.BotCommand('rankings', 'Рейтинги бойцов'),
         types.bot_command.BotCommand('upcoming_events', 'Предстоящие турниры'),
         types.bot_command.BotCommand('past_events', 'Прошедшие турниры'),
+        types.bot_command.BotCommand('settings_news', 'Настроить новости')
     ])
 
 
