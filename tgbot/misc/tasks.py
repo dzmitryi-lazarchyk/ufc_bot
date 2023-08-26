@@ -44,10 +44,18 @@ async def news(dp: Dispatcher):
 
 async def rankings():
     await renew_rankings()
+
+async def warning(dp:Dispatcher):
+    users = await Users.query.gino.all()
+    for user in users:
+        await dp.bot.send_message(chat_id=user.id,
+                                text='<b>Внимание!</b>\n'
+                                     'Везде спойлеры!Не заходите в соц сети!')
 async def scheduler(dp: Dispatcher):
     # await events()
     # await rankings()
     # await news(dp)
+    await warning(dp)
     for time in ('09:00','12:00','15:00','18:00','20:00'):
         aioschedule.every().tuesday.at(time).do(news, dp)
         aioschedule.every().wednesday.at(time).do(news, dp)
@@ -57,6 +65,8 @@ async def scheduler(dp: Dispatcher):
 
     aioschedule.every().day.at('05:00').do(events, dp)
     aioschedule.every().wednesday.do(rankings, dp)
+    aioschedule.every().sunday.at('09:00').do(warning, dp)
+
 
     while True:
         await aioschedule.run_pending()
