@@ -52,9 +52,9 @@ async def warning(dp:Dispatcher):
                                 text='<b>Внимание!</b>\n'
                                      'Везде спойлеры!Не заходите в соц сети!')
 async def scheduler(dp: Dispatcher):
-    # await events()
-    # await rankings()
-    # await news(dp)
+    await events()
+    await rankings()
+    await news(dp)
     await warning(dp)
     for time in ('09:00','12:00','15:00','18:00','20:00'):
         aioschedule.every().tuesday.at(time).do(news, dp)
@@ -63,8 +63,8 @@ async def scheduler(dp: Dispatcher):
         aioschedule.every().friday.at(time).do(news, dp)
         aioschedule.every().saturday.at(time).do(news, dp)
 
-    aioschedule.every().day.at('05:00').do(events, dp)
-    aioschedule.every().wednesday.do(rankings, dp)
+    aioschedule.every().day.at('05:00').do(events)
+    aioschedule.every().wednesday.do(rankings)
     aioschedule.every().sunday.at('09:00').do(warning, dp)
 
 
